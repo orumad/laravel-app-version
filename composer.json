@@ -2,7 +2,7 @@
   "name": "orumad/laravel-app-version",
   "description": "Update app version in 'package.json' and 'composer.json' files. Add commit message and version to the CHANGELOG.md file. Commit changes and (optionaly) deploy them.",
   "type": "library",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "keywords": [
     "laravel",
     "package",
