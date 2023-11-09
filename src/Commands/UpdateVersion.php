@@ -52,12 +52,10 @@ class UpdateVersion extends Command
         } else {
             $message = '🚧 work in progress 🤗';
         }
-        // $changelogContent = "# $newVersion\n\n- $message\n\n" . file_get_contents('CHANGELOG.md');
-        // file_put_contents('CHANGELOG.md', $changelogContent);
 
         // Commit, tag and push
         exec("git add --all");
-        exec("git commit -a -m '$message'");
+        exec('git commit -a -m "$message"');
         exec("git tag $newVersion");
         exec("git push origin main --tags");
 
@@ -75,24 +73,23 @@ class UpdateVersion extends Command
 
     private function _updateChangelog($newVersion, $message)
     {
-        // Leer el contenido actual del CHANGELOG
+        // Load the CHANGELOG content
         $changelogPath = 'CHANGELOG.md';
         $changelogContent = file_get_contents($changelogPath);
 
-        // Crear la nueva sección
+        // Prepare the message
+        $message = str_replace('\n', PHP_EOL, $message);
         $newSection = "## $newVersion\n- $message\n\n";
 
-        // Buscar la posición del primer encabezado (título) en el CHANGELOG
+        // Search the position od the first head in the CHANGELOG and insert the new message before it
         $firstHeaderPosition = strpos($changelogContent, '##');
         if ($firstHeaderPosition !== false) {
-            // Insertar la nueva sección debajo del título y antes de las secciones anteriores
             $changelogContent = substr_replace($changelogContent, $newSection, $firstHeaderPosition, 0);
         } else {
-            // Si no se encuentra un título, agregar la nueva sección al principio del CHANGELOG
             $changelogContent = $newSection . $changelogContent;
         }
 
-        // Escribir el contenido modificado en el archivo CHANGELOG
+        // Write the new CHANGELOG
         file_put_contents($changelogPath, $changelogContent);
     }
 }
