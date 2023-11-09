@@ -8,8 +8,8 @@ use Illuminate\Support\Arr;
 class UpdateVersion extends Command
 {
     protected $signature = 'update:version
-                            {--T|tag= : new app version number (optional)}
                             {message? : Commit and changelog message (optional)}
+                            {--T|tag= : new app version number (optional)}
                             {--deploy : Merge changes to deploy branch}';
     protected $description = 'Updates the app version, the changelog and commit changes to git repository';
 
@@ -55,7 +55,7 @@ class UpdateVersion extends Command
 
         // Commit, tag and push
         exec("git add --all");
-        exec('git commit -a -m "$message"');
+        exec("git commit -a -m '$message'");
         exec("git tag $newVersion");
         exec("git push origin main --tags");
 
