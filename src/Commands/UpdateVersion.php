@@ -55,7 +55,7 @@ class UpdateVersion extends Command
 
         // Commit, tag and push
         exec("git add --all");
-        exec("git commit -a -m '$message'");
+        exec("git commit -a -m \"$message\"");
         exec("git tag $newVersion");
         exec("git push origin main --tags");
 
