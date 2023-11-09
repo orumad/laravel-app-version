@@ -62,7 +62,7 @@ class UpdateVersion extends Command
         // Merge with deploy branch if '--deploy' option is present
         if ($this->option('deploy')) {
             exec("git checkout deploy");
-            exec("git merge master");
+            exec("git merge main");
             exec("git push origin deploy");
             exec("git checkout main");
             $this->info("Changes commited and pushed to deploy branch.");
