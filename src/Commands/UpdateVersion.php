@@ -7,8 +7,11 @@ use Illuminate\Support\Arr;
 
 class UpdateVersion extends Command
 {
-    protected $signature = 'update:version {version? : Nueva versión (opcional)} {message? : Mensaje de commit (opcional)} {--deploy : Realizar merge a la rama deploy}';
-    protected $description = 'Actualiza la versión, modifica CHANGELOG y realiza un commit en GIT';
+    protected $signature = 'update:version
+                            {--T|tag= : new app version number (optional)}
+                            {message? : Commit and changelog message (optional)}
+                            {--deploy : Merge changes to deploy branch}';
+    protected $description = 'Updates the app version, the changelog and commit changes to git repository';
 
     public function __construct()
     {
@@ -23,7 +26,7 @@ class UpdateVersion extends Command
         $versionParts = explode('.', $currentVersion);
 
         // Get the version argument if any
-        $newVersion = $this->argument('version');
+        $newVersion = $this->option('tag');
         if (!$newVersion) {
             // There is not a version, so we update the build (the last) part by 1
             if (count($versionParts) === 1) {
@@ -44,15 +47,19 @@ class UpdateVersion extends Command
         file_put_contents('composer.json', json_encode($composerJson, JSON_PRETTY_PRINT));
 
         // Add version and message to the 'CHANGELOG.md' file
-        $message = $this->argument('message') ?: '🚧 work in progress 🤗';
-        $changelogContent = "# $newVersion\n\n- $message\n\n" . file_get_contents('CHANGELOG.md');
-        file_put_contents('CHANGELOG.md', $changelogContent);
+        if ($message = $this->argument('message')) {
+            $this->_updateChangelog($newVersion, $message);
+        } else {
+            $message = '🚧 work in progress 🤗';
+        }
+        // $changelogContent = "# $newVersion\n\n- $message\n\n" . file_get_contents('CHANGELOG.md');
+        // file_put_contents('CHANGELOG.md', $changelogContent);
 
         // Commit, tag and push
         exec("git add --all");
         exec("git commit -a -m '$message'");
         exec("git tag $newVersion");
-        exec("git push origin --tags");
+        exec("git push origin main --tags");
 
         // Merge with deploy branch if '--deploy' option is present
         if ($this->option('deploy')) {
@@ -64,5 +71,28 @@ class UpdateVersion extends Command
         }
 
         $this->info("Version '$newVersion' updated and changes pushed to repository.");
+    }
+
+    private function _updateChangelog($newVersion, $message)
+    {
+        // Leer el contenido actual del CHANGELOG
+        $changelogPath = 'CHANGELOG.md';
+        $changelogContent = file_get_contents($changelogPath);
+
+        // Crear la nueva sección
+        $newSection = "## $newVersion\n- $message\n\n";
+
+        // Buscar la posición del primer encabezado (título) en el CHANGELOG
+        $firstHeaderPosition = strpos($changelogContent, '##');
+        if ($firstHeaderPosition !== false) {
+            // Insertar la nueva sección debajo del título y antes de las secciones anteriores
+            $changelogContent = substr_replace($changelogContent, $newSection, $firstHeaderPosition, 0);
+        } else {
+            // Si no se encuentra un título, agregar la nueva sección al principio del CHANGELOG
+            $changelogContent = $newSection . $changelogContent;
+        }
+
+        // Escribir el contenido modificado en el archivo CHANGELOG
+        file_put_contents($changelogPath, $changelogContent);
     }
 }

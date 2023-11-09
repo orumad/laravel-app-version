@@ -4,7 +4,7 @@ namespace Orumad\LaravelAppVersion;
 
 use Illuminate\Support\ServiceProvider;
 
-class TuPaqueteServiceProvider extends ServiceProvider
+class LaravelAppVersionServiceProvider extends ServiceProvider
 {
     public function boot()
     {
